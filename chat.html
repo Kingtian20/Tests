@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_circle_down"
+    />
+    <title>Ultimate Chat</title>
+    <style>
+      :root {
+        --primary-color: #007bff;
+        --bg-color: #f0f2f5;
+        --my-msg-bg: #007bff;
+        --their-msg-bg: #ffffff;
+        --admin-color: #dc3545;
+        --system-bg: #fff3cd;
+        --header-height: 70px;
+        --footer-height: 90px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background: transparent !important;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-color);
+        overflow: hidden;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+
+      #auth-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+
+      .auth-box {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        width: 400px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .auth-box input {
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+      }
+
+      .auth-box button {
+        width: 100%;
+        padding: 15px;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 10px;
+      }
+
+      #chat-container {
+        display: none;
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+        background: transparent;
+      }
+
+      header {
+        height: var(--header-height);
+        padding: 0 30px;
+        background: white;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        z-index: 10;
+      }
+
+      .header-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      #admin-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        background: white;
+        width: 90%;
+        max-width: 700px;
+        height: 80vh;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 25px;
+      }
+
+      .admin-section {
+        margin-bottom: 30px;
+      }
+
+      .admin-section h3 {
+        margin-top: 0;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 14px;
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #4a4a4a;
+        background: #f0f2f5;
+        padding: 6px 12px;
+        border-radius: 20px;
+      }
+
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: rgb(0, 204, 48);
+        border-radius: 50%;
+        margin-right: 8px;
+        animation: pulse-animation 2s infinite;
+      }
+
+      @keyframes pulse-animation {
+        0% {
+          box-shadow: 0 0 0 0 rgb(0, 204, 48);
+        }
+
+        70% {
+          box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+        }
+
+        100% {
+          box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+        }
+      }
+
+      #messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 30px 10%;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background: transparent;
+      }
+
+      .system-msg {
+        align-self: center;
+        background: var(--system-bg);
+        color: #856404;
+        padding: 10px 25px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid #ffeeba;
+        margin: 10px 0;
+        text-align: center;
+        max-width: 80%;
+      }
+
+      .message-wrapper {
+        display: flex;
+        flex-direction: column;
+        max-width: 60%;
+        animation: slideIn 0.2s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .mine {
+        align-self: flex-end;
+        align-items: flex-end;
+      }
+
+      .theirs {
+        align-self: flex-start;
+        align-items: flex-start;
+      }
+
+      .message-bubble {
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-size: 16px;
+        line-height: 1.5;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        word-wrap: break-word;
+        backdrop-filter: blur(1px);
+      }
+
+      .mine .message-bubble {
+        background: var(--my-msg-bg);
+        color: white;
+        border-bottom-right-radius: 2px;
+      }
+
+      .theirs .message-bubble {
+        background: var(--their-msg-bg);
+        color: #333;
+        border-bottom-left-radius: 2px;
+        border: 1px solid #eee;
+      }
+
+      .sender-info {
+        font-size: 12px;
+        color: #000000;
+        margin-bottom: 5px;
+        font-weight: 555;
+        font-size: 15px;
+        margin: 5px;
+      }
+
+      .timestamp {
+        font-size: 10px;
+        opacity: 0.6;
+        margin-top: 5px;
+      }
+
+      .admin-controls {
+        margin-top: 8px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .admin-btn {
+        background: var(--admin-color);
+        color: white;
+        border: none;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .input-area {
+        height: var(--footer-height);
+        padding: 0 10%;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: white;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      #messageInput {
+        flex: 1;
+        padding: 15px 25px;
+        border: 1px solid #ddd;
+        border-radius: 30px;
+        outline: none;
+        font-size: 16px;
+        background: #f8f9fa;
+      }
+
+      #sendBtn {
+        padding: 15px 30px;
+        border-radius: 30px;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .unbanBtn {
+        background: var(--admin-color);
+        color: white;
+        border: none;
+        padding: 8px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: normal;
+      }
+
+      #scrollBtn {
+        border: none;
+        background-color: var(--primary-color);
+        color: white;
+        border: 100%;
+        padding-top: 12px;
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 8px;
+        border-radius: 100px;
+        cursor: pointer;
+      }
+
+      #bgCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        pointer-events: none;
+        background: #f0f2f5;
+      }
+
+      header,
+      .input-area {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(1px);
+      }
+
+      #auth-container,
+      #chat-container,
+      #messages {
+        background: transparent !important;
+      }
+
+      #sendBtn:disabled {
+        cursor: not-allowed;
+        filter: grayscale(1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="gif-flash-overlay"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 99999;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        pointer-events: none;
+      "
+    ></div>
+    <canvas id="bgCanvas"></canvas>
+    <div id="auth-container">
+      <div class="auth-box">
+        <h1 style="margin-bottom: 10px; color: #333">Ultimate Chat</h1>
+        <p style="color: #666; margin-bottom: 10px">
+          A Dynamic chat made with Firebase
+        </p>
+        <input id="email" type="email" placeholder="Email Address" />
+        <input id="password" type="password" placeholder="Password" />
+        <button id="loginBtn" style="margin-bottom: 10px">Sign In</button>
+        <small style="color: #666" id="banMessage"
+          >Dont got an account? Contact the owner</small
+        >
+      </div>
+    </div>
+
+    <div id="admin-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 style="margin: 0">Admin Panel</h2>
+          <button
+            onclick="document.getElementById('admin-modal').style.display='none'"
+            style="
+              border: none;
+              background: none;
+              font-size: 24px;
+              cursor: pointer;
+            "
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="admin-section">
+            <h3>Broadcast Message</h3>
+            <div style="display: flex; gap: 10px">
+              <input
+                id="systemInput"
+                style="
+                  flex: 1;
+                  padding: 10px;
+                  border: 1px solid #ddd;
+                  border-radius: 8px;
+                "
+                placeholder="Alert everyone..."
+              />
+              <button
+                id="broadcastBtn"
+                style="
+                  background: orange;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: bold;
+                "
+              >
+                SEND ALERT
+              </button>
+            </div>
+            <br />
+            <h3>Background GIF Flash</h3>
+            <div style="display: flex; gap: 10px">
+              <input
+                id="gifInput"
+                style="
+                  flex: 1;
+                  padding: 10px;
+                  border: 1px solid #ddd;
+                  border-radius: 8px;
+                "
+                placeholder="https://media.giphy.com/...giphy.gif"
+              />
+              <button
+                id="flashBtn"
+                style="
+                  background: #6f42c1;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: bold;
+                "
+              >
+                FLASH!
+              </button>
+            </div>
+          </div>
+          <div class="admin-section">
+            <h3>User Directory</h3>
+            <div style="max-height: 200px; overflow-y: auto">
+              <table id="userTable">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Last Active</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="admin-section">
+            <h3>Ban Management</h3>
+            <table id="banTable">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div
+            class="admin-section"
+            style="border-top: 1px solid #eee; padding-top: 20px"
+          >
+            <button
+              id="panelClearBtn"
+              style="
+                width: 100%;
+                background: var(--admin-color);
+                color: white;
+                border: none;
+                padding: 15px;
+                border-radius: 15px;
+                cursor: pointer;
+                font-weight: bold;
+              "
+            >
+              CLEAR CHAT
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="online-modal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div class="modal-content" style="max-width: 400px; height: 60vh">
+        <div class="modal-header">
+          <h2 style="margin: 0">Online Users</h2>
+          <button
+            onclick="document.getElementById('online-modal').style.display='none'"
+            style="
+              border: none;
+              background: none;
+              font-size: 24px;
+              cursor: pointer;
+            "
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" style="padding: 0">
+          <ul
+            id="onlineUsersList"
+            style="list-style: none; padding: 0; margin: 0"
+          ></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="chat-container">
+      <header>
+        <div class="header-title">
+          <h2 style="margin: 0; font-size: 20px">Ultimate Chat</h2>
+          <div
+            class="status-indicator"
+            id="onlineIndicatorBtn"
+            style="cursor: pointer; transition: background 0.2s"
+            onmouseover="this.style.background='#e2e6ea'"
+            onmouseout="this.style.background='#f0f2f5'"
+            title="See who is online"
+          >
+            <div class="pulse-dot"></div>
+            <span id="userCounter">Online: 0</span>
+          </div>
+          <small
+            id="adminBadge"
+            style="
+              color: var(--admin-color);
+              display: none;
+              font-weight: bold;
+              background: #fff1f0;
+              padding: 4px 10px;
+              border-radius: 5px;
+              border: 1px solid #ffa39e;
+            "
+            >ADMIN MODE</small
+          >
+          <button
+            id="openAdminBtn"
+            style="
+              display: none;
+              background: var(--admin-color);
+              border: none;
+              padding: 6px 12px;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 13px;
+              font-weight: bold;
+              color: white;
+            "
+          >
+            Admin Panel
+          </button>
+        </div>
+        <button
+          id="logoutBtn"
+          style="
+            border: 1px solid #ddd;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #666;
+          "
+        >
+          Logout
+        </button>
+      </header>
+
+      <div id="messages"></div>
+      <div
+        id="typing-indicator"
+        style="
+          padding: 0 10%;
+          font-size: 15px;
+          color: #000000;
+          font-style: normal;
+          height: 20px;
+          margin-bottom: 5px;
+        "
+      ></div>
+      <div class="input-area">
+        <button id="scrollBtn" title="Scroll down">
+          <span class="material-symbols-outlined">arrow_circle_down</span>
+        </button>
+        <input
+          id="messageInput"
+          type="text"
+          placeholder="Type a message..."
+          autocomplete="off"
+          title="Type a message"
+        />
+        <button id="sendBtn" title="Send Message">Send Message</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        push,
+        onChildAdded,
+        onChildRemoved,
+        query,
+        limitToLast,
+        serverTimestamp,
+        onDisconnect,
+        set,
+        get,
+        remove,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDoWMlnq_Bo4L40V_PARwBfSatHKFR0eVc",
+        authDomain: "localchat-eec3a.firebaseapp.com",
+        databaseURL: "https://localchat-eec3a-default-rtdb.firebaseio.com",
+        projectId: "localchat-eec3a",
+        storageBucket: "localchat-eec3a.firebasestorage.app",
+        messagingSenderId: "528093271678",
+        appId: "1:528093271678:web:acac6ee2dea0d0c0432a2f",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const auth = getAuth(app);
+
+      let currentUser = null,
+        isAdmin = false;
+
+      const authScreen = document.getElementById("auth-container");
+      const chatScreen = document.getElementById("chat-container");
+      const messagesDiv = document.getElementById("messages");
+      const messageInput = document.getElementById("messageInput");
+      const userCounter = document.getElementById("userCounter");
+      const adminBtn = document.getElementById("openAdminBtn");
+      const adminBadge = document.getElementById("adminBadge");
+      const scrollBtn = document.getElementById("scrollBtn");
+      const onlineIndicatorBtn = document.getElementById("onlineIndicatorBtn");
+      const onlineModal = document.getElementById("online-modal");
+      const adminModal = document.getElementById("admin-modal");
+
+      window.onclick = (event) => {
+        if (event.target == adminModal) adminModal.style.display = "none";
+        if (event.target == onlineModal) onlineModal.style.display = "none";
+      };
+
+      onlineIndicatorBtn.onclick = () => {
+        onlineModal.style.display = "flex";
+      };
+
+      scrollBtn.onclick = () => {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      };
+
+      onAuthStateChanged(auth, async (user) => {
+        function setupAdminActions() {
+          adminBtn.onclick = () => {
+            document.getElementById("admin-modal").style.display = "flex";
+            loadAdminData();
+          };
+
+          document.getElementById("broadcastBtn").onclick = async () => {
+            const val = document.getElementById("systemInput").value;
+            if (!val) return;
+            await push(ref(db, "messages"), {
+              type: "system",
+              text: val,
+              timestamp: serverTimestamp(),
+            });
+            document.getElementById("systemInput").value = "";
+          };
+
+          document.getElementById("panelClearBtn").onclick = async () => {
+            if (confirm("Delete All???")) {
+              await set(ref(db, "messages"), null);
+              document.getElementById("admin-modal").style.display = "none";
+            }
+          };
+        }
+
+        if (user) {
+          try {
+            const banSnap = await get(ref(db, `bannedUsers/${user.uid}`));
+            if (banSnap.exists()) {
+              document.getElementById("banMessage").style.color = "red";
+              document.getElementById("banMessage").innerHTML =
+                "Your account is <strong>banned.</strong> Contact the owner if you believe this is a mistake";
+              await signOut(auth);
+              return;
+            }
+          } catch (err) {
+            console.error("Ban check error:", err);
+          }
+
+          currentUser = user;
+          set(ref(db, `users/${user.uid}`), {
+            email: user.email,
+            lastSeen: serverTimestamp(),
+          });
+
+          const connectedRef = ref(db, ".info/connected");
+          onValue(connectedRef, (snap) => {
+            if (snap.val() === true) {
+              const myPresenceRef = ref(db, `onlineUsers/${user.uid}`);
+
+              onDisconnect(myPresenceRef)
+                .remove()
+                .then(() => {
+                  set(myPresenceRef, true);
+                });
+            }
+          });
+
+          onValue(ref(db, "onlineUsers"), async (snapshot) => {
+            const count = snapshot.exists()
+              ? Object.keys(snapshot.val()).length
+              : 0;
+            if (userCounter) userCounter.textContent = `${count} Online`;
+
+            const listContainer = document.getElementById("onlineUsersList");
+            if (!listContainer) return;
+            listContainer.innerHTML = "";
+
+            if (snapshot.exists()) {
+              const onlineUids = Object.keys(snapshot.val());
+
+              for (let uid of onlineUids) {
+                const userSnap = await get(ref(db, `users/${uid}`));
+                if (userSnap.exists()) {
+                  const email = userSnap.val().email.split("@")[0];
+
+                  const li = document.createElement("li");
+                  li.style.padding = "15px 25px";
+                  li.style.borderBottom = "1px solid #f0f2f5";
+                  li.style.display = "flex";
+                  li.style.alignItems = "center";
+                  li.style.fontWeight = "500";
+                  li.innerHTML = `<div class="pulse-dot" style="margin-right: 15px; width: 10px; height: 10px;"></div> ${email}`;
+
+                  if (uid === currentUser.uid) {
+                    li.innerHTML += ` <span style="margin-left: 10px; font-size: 12px; color: #888;">(you)</span>`;
+                    li.style.background = "#f8f9fa";
+                  }
+
+                  listContainer.appendChild(li);
+                }
+              }
+            } else {
+              listContainer.innerHTML =
+                "<li style='padding: 20px; text-align: center; color: #666;'>Nobody is online... somehow.</li>";
+            }
+          });
+
+          try {
+            const adminSnap = await get(ref(db, `admins/${user.uid}`));
+            isAdmin = adminSnap.exists();
+
+            if (isAdmin) {
+              document.getElementById("adminBadge").style.display = "block";
+              adminBtn.style.display = "inline-block";
+
+              setupAdminActions();
+            } else {
+              adminBtn.style.display = "none";
+            }
+          } catch (e) {
+            console.log("Admin check failed.");
+          }
+
+          authScreen.style.display = "none";
+          chatScreen.style.display = "flex";
+          startChat();
+        } else {
+          currentUser = null;
+          isAdmin = false;
+          authScreen.style.display = "flex";
+          chatScreen.style.display = "none";
+          messagesDiv.innerHTML = "";
+          adminBtn.style.display = "none";
+          adminBadge.style.display = "none";
+        }
+      });
+
+      async function loadAdminData() {
+        const uSnap = await get(ref(db, "users"));
+        const uBody = document.querySelector("#userTable tbody");
+        uBody.innerHTML = "";
+        uSnap.forEach((child) => {
+          const d = child.val();
+          uBody.innerHTML += `<tr><td>${d.email}</td><td>${new Date(
+            d.lastSeen
+          ).toLocaleDateString()}</td></tr>`;
+        });
+
+        onValue(ref(db, "bannedUsers"), (snapshot) => {
+          const bBody = document.querySelector("#banTable tbody");
+          bBody.innerHTML = "";
+          snapshot.forEach((child) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${
+              child.val().email
+            }</td><td><button class="unbanBtn" onclick="window.unbanUser('${
+              child.key
+            }')">Unban</button></td>`;
+            bBody.appendChild(row);
+          });
+        });
+      }
+
+      window.unbanUser = (uid) => remove(ref(db, `bannedUsers/${uid}`));
+
+      document.getElementById("loginBtn").onclick = async () => {
+        const e = document.getElementById("email").value;
+        const p = document.getElementById("password").value;
+        try {
+          await signInWithEmailAndPassword(auth, e, p);
+        } catch (err) {
+          alert("Access Denied: " + err.message);
+        }
+      };
+
+      document.getElementById("logoutBtn").onclick = () => {
+        if (currentUser) remove(ref(db, `onlineUsers/${currentUser.uid}`));
+        signOut(auth);
+        adminBtn.style.display = "none";
+      };
+
+      function startChat() {
+        const messagesRef = ref(db, "messages");
+        onChildAdded(query(messagesRef, limitToLast(100)), (snapshot) => {
+          renderMessage(snapshot.val(), snapshot.key);
+        });
+        onChildRemoved(messagesRef, (snapshot) => {
+          const msgElement = document.getElementById(`msg-${snapshot.key}`);
+          if (msgElement) msgElement.remove();
+        });
+      }
+
+      async function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text || !currentUser) return;
+
+        const sendBtn = document.getElementById("sendBtn");
+        sendBtn.disabled = true;
+        messageInput.disabled = true;
+        sendBtn.style.opacity = "0.5";
+
+        try {
+          remove(ref(db, `typing/${currentUser.uid}`));
+
+          await push(ref(db, "messages"), {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            text: text,
+            timestamp: serverTimestamp(),
+          });
+
+          messageInput.value = "";
+        } catch (err) {
+          console.error("Failed to send:", err);
+          alert("Message failed to send. Please try again.");
+        } finally {
+          sendBtn.disabled = false;
+          messageInput.disabled = false;
+          sendBtn.style.opacity = "1";
+          messageInput.focus();
+        }
+      }
+
+      document.getElementById("sendBtn").onclick = sendMessage;
+      messageInput.onkeypress = (e) => {
+        if (e.key === "Enter") sendMessage();
+      };
+
+      function renderMessage(data, key) {
+        if (document.getElementById(`msg-${key}`)) return;
+
+        const messagesDiv = document.getElementById("messages");
+        const scrollBtn = document.getElementById("scrollBtn");
+        if (data.type === "system") {
+          const sys = document.createElement("div");
+          sys.id = `msg-${key}`;
+          sys.className = "system-msg";
+          sys.textContent = `Announcement: ${data.text}`;
+          messagesDiv.appendChild(sys);
+        } else {
+          const isMine = data.uid === currentUser.uid;
+          const wrapper = document.createElement("div");
+          wrapper.id = `msg-${key}`;
+          wrapper.className = `message-wrapper ${isMine ? "mine" : "theirs"}`;
+
+          if (!isMine) {
+            const info = document.createElement("div");
+            info.className = "sender-info";
+            info.textContent = data.email.split("@")[0];
+            wrapper.appendChild(info);
+          }
+
+          const bubble = document.createElement("div");
+          bubble.className = "message-bubble";
+
+          const content = document.createElement("div");
+          content.textContent = data.text;
+
+          const time = document.createElement("span");
+          time.className = "timestamp";
+          const d = data.timestamp ? new Date(data.timestamp) : new Date();
+          time.textContent = d.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          bubble.appendChild(content);
+          bubble.appendChild(time);
+          wrapper.appendChild(bubble);
+
+          if (isAdmin && !isMine) {
+            const controls = document.createElement("div");
+            controls.className = "admin-controls";
+
+            const delBtn = document.createElement("button");
+            delBtn.className = "admin-btn";
+            delBtn.textContent = "Remove Post";
+            delBtn.onclick = () => remove(ref(db, `messages/${key}`));
+
+            const banBtn = document.createElement("button");
+            banBtn.className = "admin-btn";
+            banBtn.style.background = "var(--admin-color)";
+            banBtn.style.color = "white";
+            banBtn.textContent = "Ban UID";
+            banBtn.onclick = async () => {
+              if (confirm(`Ban ${data.email}?`)) {
+                await set(ref(db, `bannedUsers/${data.uid}`), {
+                  email: data.email,
+                  at: serverTimestamp(),
+                });
+              }
+            };
+
+            controls.appendChild(delBtn);
+            controls.appendChild(banBtn);
+            wrapper.appendChild(controls);
+          }
+
+          messagesDiv.appendChild(wrapper);
+        }
+
+        const isNearBottom =
+          messagesDiv.scrollHeight - messagesDiv.clientHeight <=
+          messagesDiv.scrollTop + 200;
+
+        if (isNearBottom || data.uid === currentUser.uid) {
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        } else {
+          if (scrollBtn) scrollBtn.style.display = "block";
+        }
+      }
+      document.getElementById("flashBtn").onclick = async () => {
+        const gifUrl = document.getElementById("gifInput").value.trim();
+        if (!gifUrl) return alert("Paste a URL");
+
+        console.log("Attempting to flash:", gifUrl);
+
+        try {
+          await set(ref(db, "currentFlash"), {
+            url: gifUrl,
+            ts: Date.now(),
+          });
+          document.getElementById("gifInput").value = "";
+        } catch (err) {
+          alert("Firebase Flash Error:", err);
+        }
+      };
+
+      onValue(ref(db, "currentFlash"), (snapshot) => {
+        const data = snapshot.val();
+        if (!data || !data.url) return;
+
+        console.log("New Flash Triggered!", data.url);
+
+        const overlay = document.getElementById("gif-flash-overlay");
+
+        overlay.style.backgroundImage = `url('${data.url}')`;
+        overlay.style.display = "block";
+
+        setTimeout(() => {
+          overlay.style.display = "none";
+          overlay.style.backgroundImage = "none";
+          console.log("Flash hidden");
+          if (isAdmin) set(ref(db, "currentFlash"), null);
+        }, 3000);
+      });
+
+      onValue(ref(db, "currentFlash"), (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const overlay = document.getElementById("gif-flash-overlay");
+
+        overlay.style.backgroundImage = `url('${data.url}')`;
+        overlay.style.display = "block";
+
+        setTimeout(() => {
+          overlay.style.display = "none";
+          overlay.style.backgroundImage = "";
+        }, 2000);
+      });
+
+      let typingTimeout;
+      messageInput.addEventListener("input", () => {
+        if (!currentUser) return;
+
+        set(ref(db, `typing/${currentUser.uid}`), {
+          email: currentUser.email.split("@")[0],
+          isTyping: true,
+        });
+
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+          remove(ref(db, `typing/${currentUser.uid}`));
+
+          const myTypingRef = ref(db, `typing/${currentUser.uid}`);
+          set(myTypingRef, {
+            email: currentUser.email.split("@")[0],
+            isTyping: true,
+          });
+          onDisconnect(myTypingRef).remove();
+        }, 3000);
+      });
+
+      onValue(ref(db, "typing"), (snapshot) => {
+        const typingIndicator = document.getElementById("typing-indicator");
+        const data = snapshot.val();
+
+        if (!data) {
+          typingIndicator.textContent = "";
+          return;
+        }
+
+        const typers = Object.keys(data)
+          .filter((uid) => uid !== currentUser?.uid)
+          .map((uid) => data[uid].email);
+
+        if (typers.length === 0) {
+          typingIndicator.textContent = "";
+        } else if (typers.length === 1) {
+          typingIndicator.textContent = `${typers[0]} is typing...`;
+        } else {
+          typingIndicator.textContent = "Multiple people are typing...";
+        }
+      });
+    </script>
+
+    <script type="module">
+      const canvas = document.getElementById("bgCanvas");
+      const ctx = canvas.getContext("2d");
+      let particlesArray;
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      let sphereRadius = Math.min(canvas.width, canvas.height) * 0.35;
+      let globalAngleX = 0;
+      let globalAngleY = 0;
+      const zoom = 350;
+
+      class Particle {
+        constructor() {
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(Math.random() * 2 - 1);
+          this.baseX = sphereRadius * Math.sin(phi) * Math.cos(theta);
+          this.baseY = sphereRadius * Math.sin(phi) * Math.sin(theta);
+          this.baseZ = sphereRadius * Math.cos(phi);
+
+          this.x = 0;
+          this.y = 0;
+          this.z = 0;
+          this.projectedX = 0;
+          this.projectedY = 0;
+
+          this.size = 2;
+          this.alpha = 1;
+        }
+
+        update() {
+          let x1 =
+            this.baseX * Math.cos(globalAngleY) -
+            this.baseZ * Math.sin(globalAngleY);
+          let z1 =
+            this.baseZ * Math.cos(globalAngleY) +
+            this.baseX * Math.sin(globalAngleY);
+          let y2 =
+            this.baseY * Math.cos(globalAngleX) - z1 * Math.sin(globalAngleX);
+          let z2 =
+            z1 * Math.cos(globalAngleX) + this.baseY * Math.sin(globalAngleX);
+          this.x = x1;
+          this.y = y2;
+          this.z = z2;
+          const scale = zoom / (zoom + this.z);
+
+          this.projectedX = this.x * scale + canvas.width / 2;
+          this.projectedY = this.y * scale + canvas.height / 2;
+          this.projectedSize = this.size * scale;
+
+          this.alpha = Math.max(0.1, scale - 0.5);
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(
+            this.projectedX,
+            this.projectedY,
+            this.projectedSize,
+            0,
+            Math.PI * 2,
+            false
+          );
+          ctx.fillStyle = `rgba(0, 123, 255, ${this.alpha})`;
+          ctx.fill();
+        }
+      }
+
+      function init() {
+        particlesArray = [];
+        let numberOfParticles = 1000;
+        for (let i = 0; i < numberOfParticles; i++) {
+          particlesArray.push(new Particle());
+        }
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+        globalAngleX += 0.002;
+        globalAngleY += 0.007;
+
+        for (let i = 0; i < particlesArray.length; i++) {
+          particlesArray[i].update();
+          particlesArray[i].draw();
+
+          for (let j = i + 1; j < particlesArray.length; j++) {
+            const dx = particlesArray[i].x - particlesArray[j].x;
+            const dy = particlesArray[i].y - particlesArray[j].y;
+            const dz = particlesArray[i].z - particlesArray[j].z;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            const maxDistance = sphereRadius * 0.25;
+
+            if (distance < maxDistance) {
+              ctx.beginPath();
+              const lineAlpha =
+                (1 - distance / maxDistance) *
+                Math.min(particlesArray[i].alpha, particlesArray[j].alpha);
+
+              ctx.strokeStyle = `rgba(0, 123, 255, ${lineAlpha})`;
+              ctx.lineWidth = 1;
+              ctx.moveTo(
+                particlesArray[i].projectedX,
+                particlesArray[i].projectedY
+              );
+              ctx.lineTo(
+                particlesArray[j].projectedX,
+                particlesArray[j].projectedY
+              );
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      window.addEventListener("resize", () => {
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+        sphereRadius = Math.min(canvas.width, canvas.height) * 0.35;
+        init();
+      });
+
+      init();
+      animate();
+    </script>
+  </body>
+</html>
